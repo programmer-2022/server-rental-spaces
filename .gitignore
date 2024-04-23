@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.tmp
+.idea
+.env
+coverage/
+.npm
+.vscode
+.nyc_output
+
+mongo_data
+mongo_logs
+
+.development.env
+init

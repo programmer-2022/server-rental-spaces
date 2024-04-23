@@ -1,0 +1,109 @@
+version: "3.9"
+
+services:
+  
+  # App Prod Service
+  rental-spaces-server-prod:
+    container_name: "rental-spaces-server-prod"
+    env_file: .env
+    build:
+      target: production
+      context: .
+      args:
+        - PORT=${PORT:-8000}
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    depends_on:
+      - db
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "512m"
+        reservations:
+          cpus: "0.25"
+          memory: "256m"
+
+
+  # App Dev Service
+  rental-spaces-server-dev:
+    container_name: "rental-spaces-server-dev"
+    restart: unless-stopped
+    env_file: .env
+    build:
+      target: dev
+      context: .
+      args:
+        - PORT=${PORT:-8000}
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+      - "9229:9229"
+    networks:
+      - backend
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules/
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "512m"
+        reservations:
+          cpus: "0.25"
+          memory: "256m"
+
+  # Mongo Service
+  db:
+    image: mongo:6.0.4
+    restart: unless-stopped
+    container_name: "mongodb_service"
+    env_file: .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_PORT}
+    ports:
+      - "${MONGO_PORT}:${MONGO_PORT}"
+    volumes:
+      - ./init/init-script.js:/docker-entrypoint-initdb.d/init-mongo.js:ro 
+      - ./mongo_data:/data/db
+      - ./mongo_logs:/var/log/mongodb/
+    expose:
+      - 27017
+    networks:
+      - backend
+
+  # Mongo Client Service
+  # Da error al conectarse con este cliente [TODO]: Fix mongo express
+  mongo-express:
+    image: mongo-express:latest
+    container_name: "db-express"
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - ME_CONFIG_OPTIONS_EDITORTHEME=${MONGOEXPRESS_OPTIONS_EDITORTHEME}
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGOEXPRESS_BASICAUTH_USERNAME}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGOEXPRESS_BASICAUTH_PASSWORD}
+      - ME_CONFIG_MONGODB_URL=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@db:${MONGO_PORT}/${MONGO_DATABASE_NAME}
+    depends_on:
+      - db
+    ports:
+      - "${MONGOEXPRESS_UI_PORT}:${MONGOEXPRESS_UI_PORT}"      
+    networks:
+      - backend
+
+
+volumes:
+  node_modules:
+  mongo_data:
+  mongo_logs:
+  init:
+
+
+networks:
+  backend:
+    driver: bridge
