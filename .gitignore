@@ -11,5 +11,4 @@ coverage/
 mongo_data
 mongo_logs
 
-.development.env
-init
+.env.development

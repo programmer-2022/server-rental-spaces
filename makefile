@@ -15,12 +15,12 @@ build:
 
 # ejecutar app desarrollo
 dev:
-	docker-compose --env-file .env -f ./docker-compose.yml up rental-spaces-server-dev --build
+	docker-compose --env-file .env.development -f ./docker-compose.yml up rental-spaces-server-dev --build
 	docker ps -a
 
 # ejecutar app produccion
 prod:
-	docker-compose --env-file .env -f ./docker-compose.yml up -d rental-spaces-server-prod
+	docker-compose --env-file .env -f ./docker-compose.yml up -d rental-spaces-server-prod --build
 	docker ps -a	
 
 # ver logs de desarrollo
@@ -83,3 +83,11 @@ endef
 reset:
 	make stop
 	sudo rm -rf mongo_data dist mongo_logs
+
+# Agregar una dependencia de desarrollo al contenedor
+npmdev:
+	docker-compose exec rental-spaces-server-dev npm install $(p) -D
+
+# Agregar una dependencia de produccion al contenedor
+npmprod:
+	docker-compose exec rental-spaces-server-dev npm install $(p)
