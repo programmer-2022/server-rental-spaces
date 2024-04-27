@@ -31,7 +31,7 @@ services:
   rental-spaces-server-dev:
     container_name: "rental-spaces-server-dev"
     restart: unless-stopped
-    env_file: .env
+    env_file: .env.development
     build:
       target: dev
       context: .
@@ -46,7 +46,7 @@ services:
       - db
     volumes:
       - .:/app
-      - node_modules:/app/node_modules/
+      - ./node_modules:/usr/src/app/node_modules/
     deploy:
       resources:
         limits:
@@ -61,7 +61,7 @@ services:
     image: mongo:6.0.4
     restart: unless-stopped
     container_name: "mongodb_service"
-    env_file: .env
+    env_file: .env.development
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
