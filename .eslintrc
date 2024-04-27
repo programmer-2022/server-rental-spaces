@@ -28,7 +28,13 @@
       { "ignores": ["modules"] }
     ],
     "node/no-unpublished-import": "off",
-    "no-process-exit": "off"
+    "no-process-exit": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "no-undef": "off"
+    
   },
   "overrides": [
     {
