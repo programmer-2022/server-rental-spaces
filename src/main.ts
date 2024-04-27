@@ -1,31 +1,60 @@
-import { Logger } from "@nestjs/common";
+import { Logger, ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from "@nestjs/platform-fastify";
+import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
+import { SwaggerModule } from "@nestjs/swagger";
 
 import { AppModule } from "./app.module";
-import { CORS } from "./config";
+import { CORS, EnvMap, swaggerConfig } from "./config";
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-  );
+  // Create Instance
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
+
+  const configService = app.get<ConfigService>(ConfigService);
+  const logger = app.get(Logger);
+
+  const { GLOBAL_PREFIX, VERSION, PORT, URL_HOST, ENVIRONMENT } = EnvMap;
+
+  const environment = configService.get<string>(ENVIRONMENT);
+  const globalPrefix = configService.get<string>(GLOBAL_PREFIX, "api");
+  const version = configService.get<string>(VERSION, "v1.0");
+  const port = configService.get<number>(PORT, 8000);
+  const urlHost = configService.get<string>(URL_HOST, "localhost");
 
   // Setup Middlewares
-  app.setGlobalPrefix("api");
+  app.setGlobalPrefix(`${globalPrefix}/${version}`);
   app.enableCors(CORS);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
-  const configService = app.get(ConfigService);
-  const port = configService.get<string>("PORT", "8000");
+  // Swagger
+  const swaggerConfigCustom = swaggerConfig({ version });
+  const document = SwaggerModule.createDocument(app, swaggerConfigCustom);
+  SwaggerModule.setup("docs", app, document);
 
+  // Server UP
   await app.listen(port, "0.0.0.0");
 
-  const logger = app.get(Logger);
-  logger.log(`App is ready and listening on port ${port} 🚀`);
+  // https://textkool.com/en/ascii-art-generator?hl=default&vl=default&font=ANSI%20Shadow&text=RENTAL-SPACES
+  logger.log(`
+  ██████╗ ███████╗███╗   ██╗████████╗ █████╗ ██╗      ███████╗██████╗  █████╗  ██████╗███████╗███████╗
+  ██╔══██╗██╔════╝████╗  ██║╚══██╔══╝██╔══██╗██║      ██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝██╔════╝
+  ██████╔╝█████╗  ██╔██╗ ██║   ██║   ███████║██║█████╗███████╗██████╔╝███████║██║     █████╗  ███████╗
+  ██╔══██╗██╔══╝  ██║╚██╗██║   ██║   ██╔══██║██║╚════╝╚════██║██╔═══╝ ██╔══██║██║     ██╔══╝  ╚════██║
+  ██║  ██║███████╗██║ ╚████║   ██║   ██║  ██║███████╗ ███████║██║     ██║  ██║╚██████╗███████╗███████║
+  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚══════╝ ╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝╚══════╝
+  ****************************************************************************************************
+    App is ready and listening on port ${port} 🚀
+    Server: ${urlHost}:${port}/${globalPrefix}/${version}/health
+    Swagger: ${urlHost}:${port}/docs
+    Current Environment: ${environment}
+  `);
 }
 
 bootstrap().catch(handleError);
