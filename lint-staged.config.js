@@ -4,4 +4,4 @@ const config = {
   "*.{md,json}": "prettier --write",
 };
 
-module.exports = config;
+export default config;

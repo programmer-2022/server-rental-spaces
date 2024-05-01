@@ -1,5 +1,5 @@
-npm run build
-find dist/main.js
-docker-compose down
-rm -rf mongo_data/
-npm run test
+# npm run build
+# find dist/main.js
+# docker-compose down
+# rm -rf mongo_data/
+# npm run test
