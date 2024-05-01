@@ -5,7 +5,7 @@ import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify
 import { SwaggerModule } from "@nestjs/swagger";
 
 import { AppModule } from "./app.module";
-import { CORS, EnvMap, swaggerConfig } from "./config";
+import { CORS, EnvMap, swaggerConfig } from "./shared/config";
 
 async function bootstrap() {
   // Create Instance
