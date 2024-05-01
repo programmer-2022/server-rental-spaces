@@ -30,20 +30,8 @@
     },
     "types": ["vitest/globals"],
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts"
-  ],
   "exclude": [
     "node_modules",
     "dist",
-    "images",
-    "coverage",
-    "mongo_data",
-    "mongo_logs",
-    "tests",
-    "scripts",
-    "init",
-    ".husky"
   ]
 }
